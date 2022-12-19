@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cluster-registration
+  namespace: physics-cluster-registration
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      app: cluster-registration
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      containers:
+        - name: cluster-registration
+          # change image by the real service sync
+          image: gcr.io/knative-releases/knative.dev/eventing/cmd/event_display
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: cluster-registration
+  namespace: physics-cluster-registration
+spec:
+  selector:
+    app: cluster-registration
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+
