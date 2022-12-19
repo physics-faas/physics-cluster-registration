@@ -1,0 +1,16 @@
+apiVersion: sources.knative.dev/v1
+kind: ApiServerSource
+metadata:
+  name: api-server-source
+  namespace: physics-cluster-registration
+spec:
+  mode: Resource
+  resources:
+  - apiVersion: cluster.open-cluster-management.io/v1
+    kind: ManagedCluster
+  serviceAccountName: physics-cr-sa
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: cluster-registration

@@ -40,4 +40,24 @@ kn source apiserver physics-apiserversource \
   --resource "ManagedCluster:v1" \
   --service-account physics-cr-sa \
   --sink http://cluster-registration.physics-cluster-registration.svc.cluster.local
+  # or --sink ksvc:cluster-registration
+
+or directly create the CRD if created with 003b-sink option (knative service)
+oc apply -f deploy/004-apiserversource.yaml
 ```
+
+## Logic for the application
+
+* Receive the notification event about a new cluster being registered
+
+* Obtains the cluster name
+
+* Deploy a specific application and service in the remote cluster
+
+* Get the IP of the service and call the RF with the cluster name and the
+  service IP
+
+## Create a container from the application at cluster-registration folder
+
+### Push the image to your registry
+
