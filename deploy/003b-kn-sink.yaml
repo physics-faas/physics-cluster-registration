@@ -7,6 +7,9 @@ metadata:
   namespace: physics-cluster-registration
 spec:
   template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '1'
     spec:
       containerConcurrency: 1
       containers:
