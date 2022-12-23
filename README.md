@@ -59,5 +59,17 @@ oc apply -f deploy/004-apiserversource.yaml
 
 ## Create a container from the application at cluster-registration folder
 
+To build the a new image of the sink application, just run: 
+
+```
+$ docker build -t quay.io/myuser/cluster-registration:latest -f Dockerfile .
+```
+
 ### Push the image to your registry
+
+```
+$ docker login -u myuser quay.io
+$ docker push quay.io/ltomasbo/cluster-registration:latest
+
+```
 

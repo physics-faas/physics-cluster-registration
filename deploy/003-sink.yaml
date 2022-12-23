@@ -15,7 +15,8 @@ spec:
       containers:
         - name: cluster-registration
           # change image by the real service sync
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/event_display
+          #image: gcr.io/knative-releases/knative.dev/eventing/cmd/event_display
+          image: quay.io/ltomasbo/cluster-registration
 
 ---
 kind: Service

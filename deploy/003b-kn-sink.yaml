@@ -10,12 +10,14 @@ spec:
     metadata:
       annotations:
         autoscaling.knative.dev/maxScale: '1'
+        autoscaling.knative.dev/minScale: '1'
     spec:
       containerConcurrency: 1
       containers:
         - image: >-
           # change image by the real service sync
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/event_display
+          # image: gcr.io/knative-releases/knative.dev/eventing/cmd/event_display
+          image: quay.io/ltomasbo/cluster-registration
           imagePullPolicy: Always
           name: cluster-registration
           ports:
