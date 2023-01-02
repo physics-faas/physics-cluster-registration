@@ -69,7 +69,7 @@ $ docker build -t quay.io/myuser/cluster-registration:latest -f Dockerfile .
 
 ```
 $ docker login -u myuser quay.io
-$ docker push quay.io/ltomasbo/cluster-registration:latest
+$ docker push quay.io/myuser/cluster-registration:latest
 
 ```
 

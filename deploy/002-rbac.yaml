@@ -9,7 +9,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: physics-cr-role
-  namespace: physics-cluster-registration
 rules:
 - apiGroups: ["cluster.open-cluster-management.io"]
   resources:
@@ -18,12 +17,15 @@ rules:
   - get
   - list
   - watch
+- apiGroups: ["work.open-cluster-management.io"]
+  resources:
+  - manifestworks
+  verbs: ["*"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: physics-cr-rolebinding
-  namespace: physics-cluster-registration
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

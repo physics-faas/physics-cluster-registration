@@ -12,6 +12,7 @@ spec:
     metadata:
       labels: *labels
     spec:
+      serviceAccountName: physics-cr-sa
       containers:
         - name: cluster-registration
           # change image by the real service sync
