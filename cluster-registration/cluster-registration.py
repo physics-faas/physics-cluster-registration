@@ -1,10 +1,18 @@
+import logging
+import time
+
 from cloudevents.http import from_http
 from flask import Flask, request
 from kubernetes import client, config
 
+
 app = Flask(__name__)
 
+logging.basicConfig(level=logging.INFO)
+
 EVENT_TYPES = ("dev.knative.apiserver.resource.add",)
+MANIFEST_WORK_NAME = "cluster-registration"
+SERVICE_IP = "serviceIP"
 
 def deploy_manifest_work(namespace):
     #config.load_kube_config()
@@ -83,11 +91,30 @@ def create_manifest_work():
         }
     }
 
+    physics_semantic_r_id = {
+        "group": "",
+        "name": "service-semantics",
+        "namespace": "default",
+        "resource": "services",
+        "version": "v1"
+    }
+    physics_semantic_feedback = {
+        "type": "JSONPaths",
+        "jsonPaths": [{
+            "name": "serviceIP",
+            "path": ".spec.clusterIP"
+        }]
+    }
+    
     return {
         "apiVersion": "work.open-cluster-management.io/v1",
         "kind": "ManifestWork",
-        "metadata": {"name": "cluster-registration"},
+        "metadata": {"name": MANIFEST_WORK_NAME},
         "spec": {
+            "manifestConfigs": [{
+                "resourceIdentifier": physics_semantic_r_id,
+                "feedbackRules": [physics_semantic_feedback]
+            }],
             "workload": {
                 "manifests": [
                     physics_semantic_pod,
@@ -97,6 +124,15 @@ def create_manifest_work():
         }
     }
 
+def get_manifest_work_status(namespace):
+    config.load_incluster_config()
+    api = client.CustomObjectsApi()
+    return api.get_namespaced_custom_object_status(
+        group="work.open-cluster-management.io",
+        version="v1",
+        namespace=namespace,
+        plural="manifestworks",
+        name=MANIFEST_WORK_NAME)
 
 # create an endpoint at http://localhost:/8080/
 @app.route("/", methods=["POST"])
@@ -107,26 +143,45 @@ def home():
     # we are only interested on the omboarding of new clusters,
     # not in the updates or removal
     event_type = event['type']
-    print("The event type is %s", event_type)
+    app.logger.info('The event type is %s', event_type)
 
+    # filter by event type (only "add" event is needed)
     if event_type not in EVENT_TYPES:
        return "", 204
 
+    # Get the name of the cluster
     cluster_name = event['name']
-    print("Cluster name is %s", cluster_name)
+    app.logger.info('Cluster name is %s', cluster_name)
 
+    # create a manifestwork on the cluster name namespace
     deploy_manifest_work(namespace=cluster_name)
 
-    # print("The service IP is {}", service_ip)
+    # get the service ip (in a loop) from the manifestwork status
+    retries = 5
+    service_ip = None
+    while retries:
+        manifest_work_status = get_manifest_work_status(namespace=cluster_name)
+        if manifest_work_status.get('status'):
+            manifests = manifest_work_status['status']['resourceStatus'].get('manifests', [])
+            for manifest in manifests:
+                status_feedback = manifest.get('statusFeedback')
+                if status_feedback:
+                    for value in status_feedback['values']:
+                        if value['name'] == SERVICE_IP:
+                            service_ip = value['fieldValue']['string']
+                            break
+                if service_ip:
+                    break
+        if service_ip:
+            app.logger.info('The service IP is %s', service_ip)
+            break
+        retries-=1
+        time.sleep(5)
+
+    # query the RF with the cluster name and service IP
+    # TO DO    
 
     return "", 204
-
-    # List of steps
-    # filter by event type (only "add" event is needed)
-    # Get the name of the cluster
-    # create a manifestwork on the cluster name namespace
-    # get the service ip (in a loop) from the manifestwork status
-    # query the RF with the cluster name and service IP
 
 
 if __name__ == "__main__":
