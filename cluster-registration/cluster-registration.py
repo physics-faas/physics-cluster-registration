@@ -13,6 +13,9 @@ logging.basicConfig(level=logging.INFO)
 EVENT_TYPES = ("dev.knative.apiserver.resource.add",)
 MANIFEST_WORK_NAME = "cluster-registration"
 SERVICE_IP = "serviceIP"
+SERVICE_PORT = 5000
+SERVICE_NAMESPACE="open-cluster-management-agent"
+SERVICE_ACCOUNT="klusterlet-work-sa"
 
 def deploy_manifest_work(namespace):
     #config.load_kube_config()
@@ -36,7 +39,7 @@ def create_manifest_work():
         "metadata": {
             "labels": {"app": "service-semantics"},
             "name": "service-semantics",
-            "namespace": "default"
+            "namespace": SERVICE_NAMESPACE
             },
         "spec": {
             "replicas": 1,
@@ -57,15 +60,15 @@ def create_manifest_work():
                         "image": "registry.apps.ocphub.physics-faas.eu/wp5/service-semantics:latest",
                         "name": "service-semantics",
                         "ports": [{
-                            "containerPort": 5000,
+                            "containerPort": SERVICE_PORT,
                             "name": "semantics",
                             "protocol": "TCP"
                         }],
                         "terminationMessagePath": "/dev/termination-log",
                         "terminationMessagePolicy": "File"
                     }],
-                    "imagePullSecrets": [{"name": "jenkinssecretregistry"}],
-                    #"serviceAccountName": "semantic"
+                    "imagePullSecrets": [{"name": "physics-harbor-pullsecret"}],
+                    "serviceAccountName": SERVICE_ACCOUNT
                 }
             }
         }
@@ -77,14 +80,14 @@ def create_manifest_work():
         "metadata": {
             "labels": {"app": "service-semantics"},
             "name": "service-semantics",
-            "namespace": "default"
+            "namespace": SERVICE_NAMESPACE
             },
         "spec": {
             "ports": [{
                 "name": "semanticsef",
-                "port": 5000,
+                "port": SERVICE_PORT,
                 "protocol": "TCP",
-                "targetPort": 5000
+                "targetPort": SERVICE_PORT
             }],
             "selector": {"app": "service-semantics"},
             "type": "ClusterIP"
@@ -94,7 +97,7 @@ def create_manifest_work():
     physics_semantic_r_id = {
         "group": "",
         "name": "service-semantics",
-        "namespace": "default",
+        "namespace": SERVICE_NAMESPACE,
         "resource": "services",
         "version": "v1"
     }
@@ -174,6 +177,7 @@ def home():
                     break
         if service_ip:
             app.logger.info('The service IP is %s', service_ip)
+            app.logger.info('The service PORT is %s', SERVICE_PORT)
             break
         retries-=1
         time.sleep(5)
