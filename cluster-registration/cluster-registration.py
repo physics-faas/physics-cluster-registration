@@ -16,6 +16,7 @@ SERVICE_IP = "serviceIP"
 SERVICE_PORT = 5000
 SERVICE_NAMESPACE="open-cluster-management-agent"
 SERVICE_ACCOUNT="klusterlet-work-sa"
+PULL_SECRET="physics-harbor-pullsecret"
 
 def deploy_manifest_work(namespace):
     #config.load_kube_config()
@@ -67,7 +68,7 @@ def create_manifest_work():
                         "terminationMessagePath": "/dev/termination-log",
                         "terminationMessagePolicy": "File"
                     }],
-                    "imagePullSecrets": [{"name": "physics-harbor-pullsecret"}],
+                    "imagePullSecrets": [{"name": PULL_SECRET}],
                     "serviceAccountName": SERVICE_ACCOUNT
                 }
             }
