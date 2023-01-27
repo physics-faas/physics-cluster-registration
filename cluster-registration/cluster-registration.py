@@ -18,7 +18,8 @@ SERVICE_PORT = 5000
 SERVICE_NAMESPACE="open-cluster-management-agent"
 SERVICE_ACCOUNT="klusterlet-work-sa"
 PULL_SECRET="physics-harbor-pullsecret"
-RF_URL="172.30.235.166:5000/api/v2/cluster/register"
+RF_URL="https://semantics-block.apps.ocphub.physics-faas.eu/api/v2/cluster/register"
+RF_API_KEY="CHANGEME"
 
 def deploy_manifest_work(namespace):
     #config.load_kube_config()
@@ -186,11 +187,12 @@ def home():
         time.sleep(5)
 
     # query the RF with the cluster name and service IP
+    headers = {'X-API-Key': RF_API_KEY}
     cluster_info = {
         'clusterName': cluster_name,
         'serviceIP': "{}:{}".format(service_ip, SERVICE_PORT)
     }
-    x = requests.post(RF_URL, json=cluster_info)
+    x = requests.post(RF_URL, headers=headers, json=cluster_info)
     app.logger.info('The call to RF got: %s', x.text)
 
     return "", 204
