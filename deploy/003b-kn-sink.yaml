@@ -10,7 +10,6 @@ spec:
     metadata:
       annotations:
         autoscaling.knative.dev/maxScale: '1'
-        autoscaling.knative.dev/minScale: '1'
     spec:
       containerConcurrency: 1
       serviceAccountName: physics-cr-sa
