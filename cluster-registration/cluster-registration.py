@@ -1,4 +1,5 @@
 import logging
+import os
 import requests
 import time
 
@@ -16,8 +17,6 @@ SERVICE_PORT = 5000
 SERVICE_NAMESPACE="open-cluster-management-agent"
 SERVICE_ACCOUNT="klusterlet-work-sa"
 PULL_SECRET="physics-harbor-pullsecret"
-RF_URL="https://semantics-block.apps.ocphub.physics-faas.eu/api/v2/cluster/register"
-RF_API_KEY="CHANGEME"
 MANIFEST_WORK_SEMANTICS = "cluster-registration-semantics"
 MANIFEST_WORK_ENERGY = "cluster-registration-energy"
 
@@ -316,12 +315,12 @@ def home():
     # 3. Call the Semantic Component with the information about the pod
 
     # 4. Call the RF with the information about the semantic service (IP)
-    headers = {'X-API-Key': RF_API_KEY}
+    headers = {'X-API-Key': os.environ['RF_API_KEY']}
     cluster_info = {
         'clusterName': cluster_name,
         'serviceIP': "{}:{}".format(service_ip, SERVICE_PORT)
     }
-    x = requests.post(RF_URL, headers=headers, json=cluster_info)
+    x = requests.post(os.environ['RF_API_URL'], headers=headers, json=cluster_info)
     app.logger.info('The call to RF got: %s', x.text)
 
     return "", 204

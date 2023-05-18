@@ -18,6 +18,17 @@ spec:
           # change image by the real service sync
           #image: gcr.io/knative-releases/knative.dev/eventing/cmd/event_display
           image: quay.io/ltomasbo/cluster-registration
+          env:
+            - name: RF_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rf-credentials
+                  key: password
+            - name: RF_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: rf-credentials
+                  key: url
 
 ---
 kind: Service

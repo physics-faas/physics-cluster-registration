@@ -23,3 +23,14 @@ spec:
           ports:
             - containerPort: 8080
               protocol: TCP
+          env:
+            - name: RF_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rf-credentials
+                  key: password
+            - name: RF_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: rf-credentials
+                  key: url

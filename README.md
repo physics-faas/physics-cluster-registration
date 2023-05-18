@@ -16,7 +16,8 @@ oc apply -f deploy/002-rbac.yaml
 * Deploy the sink application handling the events:
 
 ```
-oc apply -f deploy/003-sink.yaml
+oc apply -f deploy/003-secret.yaml  # update the secret yaml file accordingly
+oc apply -f deploy/004-sink.yaml
 ```
 
   Note you need to change the container image by the one where your actual
@@ -28,7 +29,8 @@ oc apply -f deploy/003-sink.yaml
   this could lead to saving resources
 
 ```
-oc apply -f deploy/003b-sink.yaml
+oc apply -f deploy/003-secret.yaml  # update the secret yaml file accordingly
+oc apply -f deploy/004b-sink.yaml
 ```
 
 * Create the knative ApiServerSource by running the commant:
@@ -43,7 +45,7 @@ kn source apiserver physics-apiserversource \
   # or --sink ksvc:cluster-registration
 
 or directly create the CRD if created with 003b-sink option (knative service)
-oc apply -f deploy/004-apiserversource.yaml
+oc apply -f deploy/005-apiserversource.yaml
 ```
 
 ## Logic for the application
