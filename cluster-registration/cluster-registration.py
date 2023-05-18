@@ -62,7 +62,7 @@ def create_energy_manifest_work():
                         "name": "energy-semantics",
                         "image": "progrium/stress",
                         "command": ["sh", "-c"],
-                        "args": ["stress-ng --cpu 4 --vm-bytes 512M --vm-keep -t 180s"],
+                        "args": ["stress --cpu 4 --vm-bytes 512M --vm-keep -t 180s"],
                         "resources": {
                             "limits": {
                                 "cpu": "1",
