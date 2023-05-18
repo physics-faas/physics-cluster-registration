@@ -20,18 +20,18 @@ PULL_SECRET="physics-harbor-pullsecret"
 MANIFEST_WORK_SEMANTICS = "cluster-registration-semantics"
 MANIFEST_WORK_ENERGY = "cluster-registration-energy"
 
-manifest_work_map = {
-    MANIFEST_WORK_SEMANTICS: create_semantics_manifest_work,
-    MANIFEST_WORK_ENERGY: create_energy_manifest_work,
-}
-
 
 def deploy_manifest_work(namespace, manifest_type):
     #config.load_kube_config()
     config.load_incluster_config()
 
-    manifest_work = manifest_work_map.get(manifest_type)
-    manifest_work()
+    if manifest_type == MANIFEST_WORK_SEMANTICS:
+        manifest_work = create_semantics_manifest_work()
+    elif manifest_type == MANIFEST_WORK_ENERGY:
+        manifest_work = create_energy_manifest_work()
+    else:
+        # Unknown manifest
+        return
 
     api = client.CustomObjectsApi()
     api.create_namespaced_custom_object(
