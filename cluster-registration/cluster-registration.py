@@ -14,11 +14,13 @@ logging.basicConfig(level=logging.INFO)
 
 EVENT_TYPES = ("dev.knative.apiserver.resource.add",)
 SERVICE_PORT = 5000
-SERVICE_NAMESPACE="open-cluster-management-agent"
-SERVICE_ACCOUNT="klusterlet-work-sa"
-PULL_SECRET="physics-harbor-pullsecret"
+SERVICE_NAMESPACE = "open-cluster-management-agent"
+SERVICE_ACCOUNT = "klusterlet-work-sa"
+PULL_SECRET = "physics-harbor-pullsecret"
 MANIFEST_WORK_SEMANTICS = "cluster-registration-semantics"
 MANIFEST_WORK_ENERGY = "cluster-registration-energy"
+ENERGY_JOB = 'energy-semantics'
+SEMANTIC_SERVICE = 'service-semantics'
 
 
 def deploy_manifest_work(namespace, manifest_type):
@@ -48,18 +50,18 @@ def create_energy_manifest_work():
         "apiVersion": "batch/v1",
         "kind": "Job",
         "metadata": {
-            "name": "energy-semantics",
+            "name": ENERGY_JOB,
             "namespace": SERVICE_NAMESPACE
         },
         "spec": {
             "template": {
                 "metadata": {
-                    "name": "energy-semantics"
+                    "name": ENERGY_JOB
                 },
                 "spec": {
                     "containers": [
                     {
-                        "name": "energy-semantics",
+                        "name": ENERGY_JOB,
                         "image": "progrium/stress",
                         "command": ["sh", "-c"],
                         "args": ["stress --cpu 4 --vm-bytes 512M --vm-keep -t 180s"],
@@ -82,7 +84,7 @@ def create_energy_manifest_work():
 
     physics_energy_r_id = {
         "group": "batch",
-        "name": "energy-semantics",
+        "name": ENERGY_JOB,
         "namespace": SERVICE_NAMESPACE,
         "resource": "jobs",
         "version": "v1"
@@ -119,19 +121,19 @@ def create_semantics_manifest_work():
         "apiVersion": "apps/v1",
         "kind": "Deployment",
         "metadata": {
-            "labels": {"app": "service-semantics"},
-            "name": "service-semantics",
+            "labels": {"app": SEMANTIC_SERVICE},
+            "name": SEMANTIC_SERVICE,
             "namespace": SERVICE_NAMESPACE
             },
         "spec": {
             "replicas": 1,
             "selector": {
-                "matchLabels": {"app": "service-semantics"}
+                "matchLabels": {"app": SEMANTIC_SERVICE}
             },
             "strategy": {"type": "Recreate"},
             "template": {
                 "metadata": {
-                    "labels": {"app": "service-semantics"}
+                    "labels": {"app": SEMANTIC_SERVICE}
                 },
                 "spec": {
                     "containers": [{
@@ -140,7 +142,7 @@ def create_semantics_manifest_work():
                             {"name": "SEMANTICS-BLOCK-URL", "value": "https://service-semantics.apps.ocphub.physics-faas.eu"}
                         ],
                         "image": "registry.apps.ocphub.physics-faas.eu/wp5/service-semantics:latest",
-                        "name": "service-semantics",
+                        "name": SEMANTIC_SERVICE,
                         "ports": [{
                             "containerPort": SERVICE_PORT,
                             "name": "semantics",
@@ -160,8 +162,8 @@ def create_semantics_manifest_work():
         "apiVersion": "v1",
         "kind": "Service",
         "metadata": {
-            "labels": {"app": "service-semantics"},
-            "name": "service-semantics",
+            "labels": {"app": SEMANTIC_SERVICE},
+            "name": SEMANTIC_SERVICE,
             "namespace": SERVICE_NAMESPACE
             },
         "spec": {
@@ -171,14 +173,14 @@ def create_semantics_manifest_work():
                 "protocol": "TCP",
                 "targetPort": SERVICE_PORT
             }],
-            "selector": {"app": "service-semantics"},
+            "selector": {"app": SEMANTIC_SERVICE},
             "type": "ClusterIP"
         }
     }
 
     physics_semantic_r_id = {
         "group": "",
-        "name": "service-semantics",
+        "name": SEMANTIC_SERVICE,
         "namespace": SERVICE_NAMESPACE,
         "resource": "services",
         "version": "v1"
@@ -313,6 +315,13 @@ def home():
     app.logger.info('The service PORT is %s', SERVICE_PORT)
 
     # 3. Call the Semantic Component with the information about the pod
+    energy_label = 'job-name={}'.format(ENERGY_JOB)
+    pod_info = {
+        'labels': energy_label,
+    }
+    url = "http://{}".format(service_ip)
+    x = requests.post(url, json=pod_info)
+    app.logger.info('The call to Senantic Component to pass the pod label information got: %s', x.text)
 
     # 4. Call the RF with the information about the semantic service (IP)
     headers = {'X-API-Key': os.environ['RF_API_KEY']}
