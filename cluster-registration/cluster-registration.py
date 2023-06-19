@@ -178,18 +178,33 @@ def create_semantics_manifest_work():
         }
     }
 
-    physics_semantic_r_id = {
+    physics_semantic_r_id_1 = {
         "group": "",
         "name": SEMANTIC_SERVICE,
         "namespace": SERVICE_NAMESPACE,
         "resource": "services",
         "version": "v1"
     }
-    physics_semantic_feedback = {
+    physics_semantic_feedback_1 = {
         "type": "JSONPaths",
         "jsonPaths": [{
             "name": "serviceIP",
             "path": ".spec.clusterIP"
+        }]
+    }
+
+    physics_semantic_r_id_2 = {
+        "group": "apps",
+        "name": SEMANTIC_SERVICE,
+        "namespace": SERVICE_NAMESPACE,
+        "resource": "deployments",
+        "version": "v1"
+    }
+    physics_semantic_feedback_2 = {
+        "type": "JSONPaths",
+        "jsonPaths": [{
+            "name": "deploymentStatus",
+            "path": ".status.readyReplicas"
         }]
     }
     
@@ -199,8 +214,12 @@ def create_semantics_manifest_work():
         "metadata": {"name": MANIFEST_WORK_SEMANTICS},
         "spec": {
             "manifestConfigs": [{
-                "resourceIdentifier": physics_semantic_r_id,
-                "feedbackRules": [physics_semantic_feedback]
+                "resourceIdentifier": physics_semantic_r_id_1,
+                "feedbackRules": [physics_semantic_feedback_1]
+            },
+            {
+                "resourceIdentifier": physics_semantic_r_id_2,
+                "feedbackRules": [physics_semantic_feedback_2]
             }],
             "workload": {
                 "manifests": [
@@ -230,6 +249,7 @@ def deploy_semantic_component(cluster_name):
     # get the service ip (in a loop) from the manifestwork status
     retries = 5
     service_ip = None
+    deployment_ready = False
     while retries:
         manifest_work_status = get_manifest_work_status(cluster_name, MANIFEST_WORK_SEMANTICS)
         if manifest_work_status.get('status'):
@@ -241,9 +261,12 @@ def deploy_semantic_component(cluster_name):
                         if value['name'] == 'serviceIP':
                             service_ip = value['fieldValue']['string']
                             break
-                if service_ip:
+                        if value['name'] == 'deploymentStatus':
+                            if value['fieldValue']['integer'] == 1:
+                                deployment_ready = True
+                if service_ip and deployment_ready:
                     break
-        if service_ip:
+        if service_ip and deployment_ready:
             break
         retries-=1
         time.sleep(5)
@@ -319,9 +342,9 @@ def home():
     pod_info = {
         'labels': energy_label,
     }
-    url = "http://{}".format(service_ip)
+    url = "http://{}:{}".format(service_ip, SERVICE_PORT)
     x = requests.post(url, json=pod_info)
-    app.logger.info('The call to Senantic Component to pass the pod label information got: %s', x.text)
+    app.logger.info('The call to Semantic Component to pass the pod label information got: %s', x.text)
 
     # 4. Call the RF with the information about the semantic service (IP)
     headers = {'X-API-Key': os.environ['RF_API_KEY']}
