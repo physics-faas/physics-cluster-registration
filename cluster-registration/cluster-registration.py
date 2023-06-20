@@ -342,7 +342,7 @@ def home():
     pod_info = {
         'labels': energy_label,
     }
-    url = "http://{}:{}".format(service_ip, SERVICE_PORT)
+    url = "http://{}:{}/kubemantics-energy".format(service_ip, SERVICE_PORT)
     x = requests.post(url, json=pod_info)
     app.logger.info('The call to Semantic Component to pass the pod label information got: %s', x.text)
 
