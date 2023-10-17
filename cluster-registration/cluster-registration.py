@@ -54,6 +54,8 @@ def create_energy_manifest_work():
             "namespace": SERVICE_NAMESPACE
         },
         "spec": {
+            "parallelism": 3,
+            "completions": 3,
             "template": {
                 "metadata": {
                     "name": ENERGY_JOB
