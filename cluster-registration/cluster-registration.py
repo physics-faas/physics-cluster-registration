@@ -24,7 +24,7 @@ SEMANTIC_SERVICE = 'service-semantics'
 
 
 def deploy_manifest_work(namespace, manifest_type):
-    #config.load_kube_config()
+    # config.load_kube_config()
     config.load_incluster_config()
 
     if manifest_type == MANIFEST_WORK_SEMANTICS:
@@ -157,7 +157,7 @@ def create_semantics_manifest_work():
             }
         }
     }
-    
+
     physics_semantic_svc = {
         "apiVersion": "v1",
         "kind": "Service",
@@ -207,7 +207,7 @@ def create_semantics_manifest_work():
             "path": ".status.readyReplicas"
         }]
     }
-    
+
     return {
         "apiVersion": "work.open-cluster-management.io/v1",
         "kind": "ManifestWork",
@@ -340,9 +340,9 @@ def home():
     # 3. Call the Semantic Component with the information about the pod
     energy_label = 'job-name={}'.format(ENERGY_JOB)
     pod_info = {
-        'labels': energy_label,
+        'pod_label': energy_label,
     }
-    url = "http://{}:{}/kubemantics-energy".format(service_ip, SERVICE_PORT)
+    url = "http://{}:{}/kubemantics-trigger".format(service_ip, SERVICE_PORT)
     x = requests.post(url, json=pod_info)
     app.logger.info('The call to Semantic Component to pass the pod label information got: %s', x.text)
 
